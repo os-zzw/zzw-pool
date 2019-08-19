@@ -26,11 +26,11 @@ public class KeyPoolImpl<K, V> implements KeyPool<K, V> {
     private final Map<K, KeyRef> map = new ConcurrentHashMap<>();
     private boolean useRandom;
 
-    public KeyPoolImpl(Supplier<V> factory, int count, ThrowableConsumer<V, Exception> deposeFunc,
-            boolean useRandom) {
+    public KeyPoolImpl(Supplier<V> factory, int poolCount,
+            ThrowableConsumer<V, Exception> deposeFunc, boolean useRandom) {
         this.useRandom = useRandom;
         this.deposeFunc = checkNotNull(deposeFunc);
-        this.all = IntStream.range(0, count)//
+        this.all = IntStream.range(0, poolCount)//
                 .mapToObj(it -> factory.get())//
                 .map(ValueRef::new)//
                 .collect(Collectors.toList());

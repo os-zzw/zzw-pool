@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
+import zzw.impl.KeyPoolExecutorBuilder;
 
 /**
  * Unit test for simple App.
@@ -12,11 +13,14 @@ public class AppTest {
 
     private static final int THREAD_COUNT = 4;
 
-    private final KeyPoolExecutor<Long> worker = KeyPoolExecutor
+    private final KeyPoolExecutor<Long> worker = KeyPoolExecutorBuilder
             .newSerializingExecutor(THREAD_COUNT, "zzw-pool");
 
+    /**
+     * 针对于同一个key顺序执行的线程池
+     */
     @Test
-    public void testPool() throws InterruptedException {
+    public void testKeyPool() throws InterruptedException {
         worker.execute(1L, () -> {
             System.out.println(Thread.currentThread().getId());
             try {

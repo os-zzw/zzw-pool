@@ -18,23 +18,23 @@ public class KeyPoolBuilder<V> {
     private static final int THREAD_COUNT = 20;
 
     private Supplier<V> factory;
-    private int count;
+    private int poolCount;
     private ThrowableConsumer<V, Exception> depose;
     private Boolean usingRandom;
 
-    <K> KeyPool<K, V> buildInner() {
-        return new KeyPoolImpl<>(factory, count, depose, usingRandom);
+    public <K> KeyPool<K, V> buildInner() {
+        return new KeyPoolImpl<>(factory, poolCount, depose, usingRandom);
     }
 
-    void ensure() {
-        if (count < 0) {
+    public void ensure() {
+        if (poolCount < 0) {
             throw new IllegalArgumentException();
         }
         if (depose == null) {
             depose = it -> {};
         }
         if (usingRandom == null) {
-            usingRandom = count > THREAD_COUNT;
+            usingRandom = poolCount > THREAD_COUNT;
         }
     }
 
@@ -43,8 +43,8 @@ public class KeyPoolBuilder<V> {
         return (T) this;
     }
 
-    public <T extends KeyPoolBuilder<V>> T count(int count) {
-        this.count = count;
+    public <T extends KeyPoolBuilder<V>> T poolCount(int count) {
+        this.poolCount = count;
         return (T) this;
     }
 
