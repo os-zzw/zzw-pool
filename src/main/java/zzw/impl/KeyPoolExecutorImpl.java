@@ -1,4 +1,4 @@
-package zzw.reimpl;
+package zzw.impl;
 
 import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 
@@ -12,7 +12,6 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 
 import zzw.KeyPool;
 import zzw.KeyPoolExecutor;
-import zzw.impl.LazyKeyPool;
 
 /**
  * @author zhangzhewei
