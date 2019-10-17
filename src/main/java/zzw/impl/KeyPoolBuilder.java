@@ -36,6 +36,9 @@ public class KeyPoolBuilder<V> {
         if (usingRandom == null) {
             usingRandom = poolCount > THREAD_COUNT;
         }
+        if (factory == null) {
+            throw new IllegalArgumentException();
+        }
     }
 
     public <T extends KeyPoolBuilder<V>> T factoty(Supplier<V> factory) {

@@ -21,9 +21,9 @@ import zzw.KeyPool;
  */
 public class KeyPoolImpl<K, V> implements KeyPool<K, V> {
 
-    private final List<ValueRef> all;
+    private final List<PoolRef> all;
     private final ThrowableConsumer<V, Exception> deposeFunc;
-    private final Map<K, KeyRef> map = new ConcurrentHashMap<>();
+    private final Map<K, PoolRef> map = new ConcurrentHashMap<>();
     private boolean useRandom;
 
     public KeyPoolImpl(Supplier<V> factory, int poolCount,
@@ -32,26 +32,26 @@ public class KeyPoolImpl<K, V> implements KeyPool<K, V> {
         this.deposeFunc = checkNotNull(deposeFunc);
         this.all = IntStream.range(0, poolCount)//
                 .mapToObj(it -> factory.get())//
-                .map(ValueRef::new)//
+                .map(PoolRef::new)//
                 .collect(Collectors.toList());
     }
 
     @Override
     public V select(K key) {
-        KeyRef keyRef = map.compute(key, (k, v) -> {
+        PoolRef poolRef = map.compute(key, (k, v) -> {
             if (v == null) {
                 if (useRandom) {
-                    v = new KeyRef(all.get(ThreadLocalRandom.current().nextInt(all.size())));
+                    v = all.get(ThreadLocalRandom.current().nextInt(all.size()));
                 } else {
-                    v = all.stream().min(comparingInt(ValueRef::getConcurrency))//
-                            .map(KeyRef::new)//
+                    v = all.stream()//
+                            .min(comparingInt(PoolRef::concurrency))//
                             .orElseThrow(IllegalStateException::new);
                 }
             }
             v.incrConcurrency();
             return v;
         });
-        return keyRef.ref();
+        return poolRef.ref();
     }
 
     @Override
@@ -68,56 +68,45 @@ public class KeyPoolImpl<K, V> implements KeyPool<K, V> {
     @Override
     public void close() throws Exception {
         synchronized (all) {
-            while (all.stream().anyMatch(valueRef -> valueRef.getConcurrency() > 0)) {
+            while (all.stream().anyMatch(valueRef -> valueRef.concurrency() > 0)) {
                 all.wait();
             }
         }
-        for (ValueRef valueRef : all) {
+        for (PoolRef valueRef : all) {
             deposeFunc.accept(valueRef.value);
         }
     }
 
-    private class KeyRef {
+    private class PoolRef {
 
-        private final ValueRef valueRef;
+        private final V value;
         private final AtomicInteger concurrency = new AtomicInteger();
 
-        public KeyRef(ValueRef valueRef) {
-            this.valueRef = valueRef;
+        public PoolRef(V value) {
+            this.value = value;
         }
 
         void incrConcurrency() {
             this.concurrency.getAndIncrement();
-            valueRef.concurrency.getAndIncrement();
         }
 
         boolean decrConcurrency() {
-            int r = concurrency.decrementAndGet();
             int valueRefConcurrency = concurrency.decrementAndGet();
             if (valueRefConcurrency <= 0) {
                 synchronized (all) {
                     all.notifyAll();
                 }
             }
-            return r <= 0;
+            return valueRefConcurrency <= 0;
         }
 
         V ref() {
-            return valueRef.value;
-        }
-    }
-
-    private class ValueRef {
-
-        private final V value;
-        private final AtomicInteger concurrency = new AtomicInteger();
-
-        public ValueRef(V value) {
-            this.value = value;
+            return value;
         }
 
-        int getConcurrency() {
+        int concurrency() {
             return concurrency.get();
         }
     }
+
 }
