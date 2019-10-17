@@ -30,7 +30,7 @@ public class AppTest {
             }
             System.out.println("end");
         });
-        worker.execute(2L, () -> {
+        worker.execute(1L, () -> {
             System.out.println(Thread.currentThread().getId());
         });
         Thread.sleep(5000L);
