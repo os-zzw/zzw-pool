@@ -36,7 +36,7 @@ public class QueuePool<T> implements Iterable<QueueProxy> {
     }
 
     public Runnable take() throws InterruptedException {
-        QueueProxy proxy = doBindQueue(unBindProxys::take);
+        QueueProxy proxy = bindQueue(unBindProxys::take);
         Runnable runnable = catchingGetRunnable(() -> proxy.queue().take(), proxy);
         return buildKeyRunnable(runnable, proxy);
     }
@@ -55,7 +55,7 @@ public class QueuePool<T> implements Iterable<QueueProxy> {
     }
 
     public Runnable poll() {
-        QueueProxy proxy = doBindQueue(unBindProxys::poll);
+        QueueProxy proxy = bindQueue(unBindProxys::poll);
         if (proxy == null) {
             return null;
         }
@@ -64,7 +64,7 @@ public class QueuePool<T> implements Iterable<QueueProxy> {
     }
 
     public Runnable poll(long timeout, TimeUnit unit) throws InterruptedException {
-        QueueProxy proxy = doBindQueue(unBindProxys::poll);
+        QueueProxy proxy = bindQueue(unBindProxys::poll);
         if (proxy == null) {
             return null;
         }
@@ -166,7 +166,7 @@ public class QueuePool<T> implements Iterable<QueueProxy> {
         }
     }
 
-    private <E extends Throwable> QueueProxy doBindQueue(ThrowableSupplier<QueueProxy, E> queueSupplier) throws E {
+    private <E extends Throwable> QueueProxy bindQueue(ThrowableSupplier<QueueProxy, E> queueSupplier) throws E {
         retry:
         while (true) {
             QueueProxy proxy = queueSupplier.get();
