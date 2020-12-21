@@ -1,9 +1,9 @@
-package com.github.zzw.impl;
+package com.github.zzw.pool.impl;
 
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.IntSupplier;
 
-import com.github.zzw.KeyRunnable;
+import com.github.zzw.pool.KeyRunnable;
 
 /**
  * @author zhangzhewei
@@ -13,12 +13,23 @@ public class KeyExecutor<T> {
 
     private final KeyPoolExecutor keyPoolExecutor;
 
+    /**
+     *
+     * @param parallelCount 消费不同key并发数
+     * @param queueBufferCount 每个缓存队列最大缓存元素个数
+     */
     public KeyExecutor(IntSupplier parallelCount, int queueBufferCount) {
         this.keyPoolExecutor = new KeyPoolExecutor(parallelCount, () -> new LinkedBlockingQueue<>(queueBufferCount), parallelCount);
     }
 
-    public KeyExecutor(KeyPoolExecutor keyPoolExecutor) {
-        this.keyPoolExecutor = keyPoolExecutor;
+    /**
+     *
+     * @param threadCountSupplier
+     * @param queueCountSupplier
+     * @param queueBufferCount
+     */
+    public KeyExecutor(IntSupplier threadCountSupplier, IntSupplier queueCountSupplier, int queueBufferCount) {
+        this.keyPoolExecutor = new KeyPoolExecutor(threadCountSupplier, () -> new LinkedBlockingQueue<>(queueBufferCount), queueCountSupplier);
     }
 
     public void execute(T id, Runnable runnable) {

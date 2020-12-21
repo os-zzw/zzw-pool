@@ -1,8 +1,8 @@
-package com.github.zzw.utils;
+package com.github.zzw.pool.utils;
 
 import java.util.function.IntSupplier;
 
-import com.github.zzw.impl.KeyExecutor;
+import com.github.zzw.pool.impl.KeyExecutor;
 
 /**
  * @author zhangzhewei

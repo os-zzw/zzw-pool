@@ -6,8 +6,8 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.github.zzw.impl.KeyExecutor;
-import com.github.zzw.utils.KeyExecutorUtils;
+import com.github.zzw.pool.impl.KeyExecutor;
+import com.github.zzw.pool.utils.KeyExecutorUtils;
 
 
 /**

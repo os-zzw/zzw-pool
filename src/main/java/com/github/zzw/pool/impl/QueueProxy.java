@@ -1,4 +1,4 @@
-package com.github.zzw.impl;
+package com.github.zzw.pool.impl;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -7,14 +7,14 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * @author zhangzhewei
  */
-public class QueueHolder {
+public class QueueProxy {
 
     private final int queueId;
     private final BlockingQueue<Runnable> queue;
     private final AtomicReference<Thread> thread = new AtomicReference<>();
-    private final AtomicBoolean idle = new AtomicBoolean(true);//闲置状态不能被
+    private final AtomicBoolean canInQueue = new AtomicBoolean(true);
 
-    public QueueHolder(int queueId, BlockingQueue<Runnable> queue) {
+    public QueueProxy(int queueId, BlockingQueue<Runnable> queue) {
         this.queueId = queueId;
         this.queue = queue;
     }
@@ -35,13 +35,25 @@ public class QueueHolder {
     }
 
     /**
-     * 解绑线程并返回当前holder
+     * 解绑线程
      */
     public void unbind() {
         thread.compareAndSet(Thread.currentThread(), null);
     }
 
-    public AtomicBoolean getIdle() {
-        return idle;
+    public boolean isEmpty() {
+        return queue.isEmpty();
     }
+
+    public boolean isNotEmpty() {
+        return !queue.isEmpty();
+    }
+
+    /**
+     * 获取该代理是否已经加入了线程绑定队列
+     */
+    public AtomicBoolean getCanInQueue() {
+        return canInQueue;
+    }
+
 }

@@ -1,4 +1,4 @@
-package com.github.zzw.impl;
+package com.github.zzw.pool.impl;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;

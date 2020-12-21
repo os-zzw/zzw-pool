@@ -1,4 +1,4 @@
-package com.github.zzw.impl;
+package com.github.zzw.pool.impl;
 
 import static com.google.common.base.Suppliers.memoize;
 
@@ -10,13 +10,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
-import com.github.zzw.KeyRunnable;
+import com.github.zzw.pool.KeyRunnable;
 
 
 /**
  * @author zhangzhewei
  */
-public class KeyBlockingQueue extends AbstractQueue<Runnable> implements BlockingQueue<Runnable> {
+@SuppressWarnings("unchecked")
+public class KeyBlockingQueue<T> extends AbstractQueue<Runnable> implements BlockingQueue<Runnable> {
 
     private final Supplier<BlockingQueue<Runnable>> queueSupplier;
     private final IntSupplier queueCountSupplier;
@@ -25,10 +26,10 @@ public class KeyBlockingQueue extends AbstractQueue<Runnable> implements Blockin
     public KeyBlockingQueue(Supplier<BlockingQueue<Runnable>> queueSupplier, IntSupplier queueCountSupplier) {
         this.queueSupplier = queueSupplier;
         this.queueCountSupplier = queueCountSupplier;
-        this.queuePoolSupplier = memoize(() -> new QueuePool(queueSupplier, queueCountSupplier.getAsInt()));
+        this.queuePoolSupplier = memoize(() -> new QueuePool<T>(queueSupplier, queueCountSupplier.getAsInt()));
     }
 
-    private QueuePool queuePool() {
+    private QueuePool<T> queuePool() {
         return queuePoolSupplier.get();
     }
 
@@ -99,6 +100,5 @@ public class KeyBlockingQueue extends AbstractQueue<Runnable> implements Blockin
     public int drainTo(Collection<? super Runnable> c, int maxElements) {
         return queuePool().drainTo(c, maxElements);
     }
-
 
 }
