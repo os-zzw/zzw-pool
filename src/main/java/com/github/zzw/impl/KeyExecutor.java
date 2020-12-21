@@ -9,7 +9,7 @@ import com.github.zzw.KeyRunnable;
  * @author zhangzhewei
  * Created on 2020-12-19
  */
-public class KeyExecutor {
+public class KeyExecutor<T> {
 
     private final KeyPoolExecutor keyPoolExecutor;
 
@@ -21,10 +21,10 @@ public class KeyExecutor {
         this.keyPoolExecutor = keyPoolExecutor;
     }
 
-    public void execute(long id, Runnable runnable) {
+    public void execute(T id, Runnable runnable) {
         keyPoolExecutor.execute(new KeyRunnable() {
             @Override
-            public long getKey() {
+            public T getKey() {
                 return id;
             }
 

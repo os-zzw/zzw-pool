@@ -1,5 +1,7 @@
 package com.github.zzw.impl;
 
+import static java.util.Objects.hash;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -10,7 +12,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import com.github.zzw.KeyRunnable;
-import com.github.zzw.KeySupplier;
 import com.github.zzw.ThrowablePredicate;
 import com.github.zzw.ThrowableSupplier;
 import com.google.common.collect.Iterators;
@@ -20,7 +21,7 @@ import com.google.common.util.concurrent.Uninterruptibles;
 /**
  * @author zhangzhewei
  */
-public class QueuePool implements Iterable<QueueHolder> {
+public class QueuePool<T> implements Iterable<QueueHolder> {
 
     private final List<QueueHolder> holderList;
     private final BlockingQueue<QueueHolder> unBindHolders;
@@ -117,8 +118,8 @@ public class QueuePool implements Iterable<QueueHolder> {
         return maxElements - left;
     }
 
-    private QueueHolder selectQueue(long key) {
-        return holderList.get((int) (key % holderList.size()));
+    private QueueHolder selectQueue(T key) {
+        return holderList.get(hash(key) % holderList.size());
     }
 
     private <T extends Throwable> boolean addRunnable(Runnable runnable, ThrowablePredicate<QueueHolder, T> predicate) throws T {
@@ -131,8 +132,8 @@ public class QueuePool implements Iterable<QueueHolder> {
         return true;
     }
 
-    private long getKey(Runnable runnable) {
-        return ((KeySupplier) runnable).getKey();
+    private T getKey(Runnable runnable) {
+        return ((KeyRunnable<T>) runnable).getKey();
     }
 
     private Runnable buildUnBindRunnable(Runnable runnable, QueueHolder holder) {

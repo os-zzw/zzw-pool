@@ -16,33 +16,33 @@ import com.github.zzw.utils.KeyExecutorUtils;
  */
 public class BaseTest {
 
-
     /**
      * 针对于同一个key顺序执行的线程池
      */
     @Test
     public void testKeyPool() throws InterruptedException {
         KeyExecutor keyExecutor = KeyExecutorUtils.newKeySerializingExecutor(() -> 4);
-        Map<Integer, Integer> map = new HashMap<>();
-
+        Map<String, Integer> map = new HashMap<>();
+        String str1 = "1";
+        String str2 = "2";
         //线程1对key:1添加操作
-        keyExecutor.execute(1, () -> {
+        keyExecutor.execute(str1, () -> {
             try {
                 Thread.sleep(1000L);
-                map.put(1, 100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            map.put(str1, 100);
             System.out.println("线程1end");
         });
         //线程2对key:1删除操作
-        keyExecutor.execute(1, () -> {
-            map.remove(1);
+        keyExecutor.execute(str1, () -> {
+            map.remove(str1);
             System.out.println("线程2end");
         });
         //线程3对key:2增加操作
         keyExecutor.execute(2, () -> {
-            map.put(2, 100);
+            map.put(str2, 100);
             System.out.println("线程3end");
         });
 
